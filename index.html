@@ -1,0 +1,820 @@
+<!doctype html><html><head><meta charset="utf-8"/><link rel="stylesheet" href="https://www.w3schools.com/w3css/4/w3.css"><title>Square-It-All</title><script src="https://unpkg.com/react@16/umd/react.development.js"></script><script src="https://unpkg.com/react-dom@16/umd/react-dom.development.js"></script><script src="https://unpkg.com/babel-standalone@6.26.0/babel.js"></script><style>button{outline:0!important}</style><link href="/pyd3690/SquareItAll.git/static/css/main.5f361e03.chunk.css" rel="stylesheet"></head><body style="min-width:50%;overflow:auto"><div class="w3-row w3-container"><div class="w3-col l4 w3-center"></div><div class="w3-col l43 w3-center"><h1 class="w3-mobile">Square-It-All<br/><p id="result" class="w3-xlarge w3-mobile"></p></h1></div><div class="w3-col l4 w3-center"></div></div><br/><div class="w3-mobile w3-row w3-container" style="padding-right:3%;padding-left:3%"><div id="leftScoreC" class="w3-col l2 m12 s12 w3-mobile w3-container" style="height:25%;color:#fff"><p id="p1" class="w3-large w3-mobile" style="word-break:break-all"></p><p id="leftScore" class="w3-xxxlarge w3-mobile" style="height:70%">00</p><p class="w3-small w3-mobile" onclick='1==confirm("Start new Game?")&&location.reload()'>(Click here to restart)</p></div><div class="w3-col w3-text-white l1 m12 s12 w3-center">blank</div><div id="gridContainer" class="w3-col l6 m12 s12 w3-mobile w3-center w3-container" style="padding-top:0"><table id="root" style="width:100%;float:none;padding-right:10%;padding-left:10%;margin-right:0"></table></div><div class="w3-col w3-text-white l1 m12 s12 w3-center">blank</div><div id="rightScoreC" class="w3-mobile w3-col l2 m12 s12 w3-container" style="height:25%;color:#fff"><p id="p2" class="w3-large w3-mobile" style="word-break:break-all"></p><p id="rightScore" class="w3-xxxlarge w3-mobile" style="height:70%">00</p><p class="w3-small w3-mobile" onclick='1==confirm("Start new Game?")&&location.reload()'>(Click here to restart)</p></div></div><script type="text/babel">// game settings
+        var gameSize = 7; // grid size
+        var buttonCount = gameSize * (gameSize +2) + 1; //number of grid buttons
+        var squareCount = gameSize * ((gameSize-1)/2) + (gameSize - ((gameSize-1)/2)); // number of grid squares
+        var buttons = new Array(buttonCount); // buttons list
+        var squares = new Array(squareCount); // squares list
+        var current_playing = 0; // player id
+        var p1_name= prompt("Enter your game Name", "Guest"), p1_color = "pink";
+        var p2_name="SquareMaster", p2_color = "blue";
+        var players = [{PName:p1_name, color:p1_color, score:0}, {PName:p2_name, color:p2_color, score:0}];
+        var already_inc = false;
+
+        var clicked_indexes = [];
+        var start = -1;
+
+        for (let s = 0; s < buttonCount; s++) {
+          clicked_indexes[s] = s;  
+        }
+
+        var order = Math.floor(Math.random() * 2);
+        if(order == 0){
+          var temp = {PName:p2_name, color:p2_color, score:0};
+          players[1] = players[0];
+          players[0] = temp;
+        }
+        
+        document.getElementById("result").innerHTML = players[0].PName + " starts!";
+
+        
+        // grid cell dimensions settings
+        var cellH = 90;
+        var cellHvw = 16;
+
+        //score color and name
+        document.getElementById("leftScoreC").className += " w3-xxxlarge w3-center " + " w3-" + players[0].color; // p1_color;
+        document.getElementById("p1").innerText = players[0].PName; //p1_name;
+
+        document.getElementById("rightScoreC").className += " w3-xxxlarge w3-center " + " w3-" + players[1].color; //;
+        document.getElementById("p2").innerText = players[1].PName; //p2_name;
+
+        // grid components colors
+        var btn_init_color = "black"; // + "w3-btn w3-border w3-border-black"
+        var cell_init_color = "white";
+        var square_init_color = "grey";
+    
+        // cell style settings
+        var cellClass = "w3-display-container w3-" + cell_init_color;
+        var cellStyle, left_cellStyle;
+        var middlesquareStyle;
+        var verticalButtonStyle;
+        var horizontalButtonStyle
+
+        // check for screen size to implement responsiveness
+        
+	  cellStyle = {height: 0.95*cellH + "px", width: 0.95*cellH + "px", padding: "0px"};
+	  left_cellStyle = {height: cellH + "px", width: cellH * 1 + "px", padding: "0px"};
+	  middlesquareStyle = {height: cellH * 0.55 + "%", width:  cellH * 0.55 + "%"};
+	  verticalButtonStyle = {height: cellH * 0.65 + "%", width:  cellH * 0.1 + "%", padding: "0px", border: "none", minWidth: "0px"};
+	  horizontalButtonStyle = {height:  cellH * 0.12 + "%", width:  cellH * 0.65 + "%", padding: "0px", border: "none"};
+        
+        
+        // square style
+        var squareClass = " w3-display-middle w3-round-large w3-" + square_init_color;
+        var squareClassF = " w3-display-middle w3-round-large";
+        var left_squareClass = " w3-display-middle w3-round-large w3-" + square_init_color;
+        var left_squareClassF = " w3-display-middle w3-round-large";
+        var centralU_squareClass = " w3-display-middle w3-round-large w3-" + square_init_color;
+        var centralU_squareClassF = " w3-display-middle w3-round-large";
+    
+        // button style
+        var leftButtonClass = " w3-display-left w3-round-xxlarge w3-" + btn_init_color;
+        var leftButtonClassF = " w3-display-left w3-round-xxlarge";
+        var rightButtonClass = " w3-display-right w3-round-xxlarge w3-" + btn_init_color;
+        var rightButtonClassF = " w3-display-right w3-round-xxlarge";
+        var topButtonClass = " w3-display-topmiddle w3-round-xxlarge w3-" + btn_init_color;
+        var topButtonClassF = " w3-display-topmiddle w3-round-xxlarge";
+        var bottomButtonClass = " w3-display-bottommiddle w3-round-xxlarge w3-" + btn_init_color;
+        var bottomButtonClassF = " w3-display-bottommiddle w3-round-xxlarge";
+        var leftcell_topButtonClass = " w3-display-topleft w3-round-xxlarge w3-" + btn_init_color;
+        var leftcell_topButtonClassF = " w3-display-topleft w3-round-xxlarge";
+        var leftcell_bottomButtonClass = " w3-display-bottomleft w3-round-xxlarge w3-" + btn_init_color;
+        var leftcell_bottomButtonClassF = " w3-display-bottomleft w3-round-xxlarge";
+
+        // button indexing
+        var buttonIndex = 1, squareIndex = 1; 
+        var bottom_indexes = new Array(gameSize+1);
+        var squares_indexes = [];
+        var filled = [];
+        
+
+        // built bottom indexes
+        var value = 2;
+        for (let index = 0; index < bottom_indexes.length; index++) {
+          var line_size;
+          if (index < (gameSize-1)/2) {
+            line_size = 2 * index + 1;
+          }
+          else if (index == (gameSize-1)/2 || index == (gameSize-1)/2 + 1) {
+            line_size = gameSize;
+          }
+          else {
+            line_size = gameSize - index + gameSize%(index-1);
+          }
+          
+          bottom_indexes[index] = new Array(line_size);
+          for (let i = 0; i < line_size; i++) {
+            bottom_indexes[index][i] = value;
+            if(i == line_size-1){
+              if (index <= (gameSize-1)/2 - 1) {
+                value += 3;
+              }
+              else if (index == (gameSize-1)/2 -1 || index == (gameSize-1)/2) {
+                value += 2;
+              }
+              else {
+                value++;
+              }
+            }
+            else
+              value += 2;
+          }          
+        }
+        
+        var sqId = 1;
+        // get squares of indexes
+        for (let j = 1; j <= gameSize; j++) {
+          for (let x = 0; x < bottom_indexes[j-1].length; x++) {
+            var tp, bot;
+            if(j < (gameSize+1)/2){
+              tp = bottom_indexes[j-1][x];
+              bot = bottom_indexes[j][x+1];
+            }
+            else if(j == (gameSize+1)/2){
+              tp = bottom_indexes[j-1][x];
+              bot = bottom_indexes[j][x];
+            }
+            else{
+              if (x < 1 || x > bottom_indexes[j-1].length-2) {
+                continue;
+              }
+              tp = bottom_indexes[j-1][x];
+              bot = bottom_indexes[j][x-1];
+            }
+            
+            var lft = tp-1;
+            var rgt = tp + 1;
+            var res = {"idx":sqId, "T":tp, "B":bot, "L":lft, "R":rgt};
+            squares_indexes[sqId-1] = res;
+            sqId++;
+          }
+        }
+       
+
+        // get index from id
+        function getIndexFromID(id){
+          var res = id.split("-");
+          //alert("Got index from id: " + parseInt(res[1]));
+          return parseInt(res[1]);
+        }
+
+        function checkIfAllClicked(idx, sq){
+          var sqr = squares_indexes[sq-1];
+          var result = true;
+          var ids = [sqr["T"], sqr["B"], sqr["L"], sqr["R"]];
+          for (let i = 0; i < ids.length; i++) {
+            if (ids[i] != idx) {
+              result = result && document.getElementById("btn-"+ ids[i]).disabled;
+            }            
+          }
+          //alert("checked if all cliked!");
+          return result;
+        }
+
+        function checkIfAllClickedWS(idx, sq, v){
+          var sqr = squares_indexes[sq-1];
+          var result = true;
+          var ids = [sqr["T"], sqr["B"], sqr["L"], sqr["R"]];
+          for (let i = 0; i < ids.length; i++) {
+            if (ids[i] != idx && ids[i] != v) {
+              //ReactDOM.render(<App gridSize={gameSize}/>, document.getElementById('root'));
+              //console.log("\n" + document.getElementById("btn-"+ ids[i]).className);
+              var endwithblack = document.getElementById("btn-"+ ids[i]).className.endsWith("black");
+              result = result && !(endwithblack);
+              console.log("Button " + ids[i] + " disabled: " + !(endwithblack));
+            }            
+          }
+          //alert("checked if all cliked!");
+          return result;
+        }
+
+        function checkEnd(){
+          //result
+          ReactDOM.render(<div>{players[0].score}</div>, document.getElementById('leftScore'));
+          ReactDOM.render(<div>{players[1].score}</div>, document.getElementById('rightScore'));
+
+          var result = "";
+          //var score = " " + players[0].score + " - " + players[1].score;
+          //alert("P1:" + players[0].score + " ---- P2:" + players[1].score);
+          if(players[0].score + players[1].score == squareCount){
+            result += "Game Ended!";
+            if(players[0].score == players[1].score)
+              result += "<br/>Draw!" + score;
+            else{
+              if(players[0].score < players[1].score)
+                result += "<br/>" + players[1].PName + " wins!" + " " + players[1].score + " - " + players[0].score;
+              if(players[1].score < players[0].score)
+                result += "<br/>" + players[0].PName + " wins!" + " " + players[0].score + " - " + players[1].score;
+            }
+            //alert(result);
+            document.getElementById("result").innerHTML = result;            
+          }   
+        }
+
+        function FillSquares(btIdx, clr, cp){
+          //alert("fill squares started!");
+          var idx = getIndexFromID(btIdx);
+          var x = getSquaresForBtn(btIdx);
+          var squaresS = x.split("-");
+          already_inc = false;
+
+          if (squaresS.length == 3) {
+            var x1 = parseInt(squaresS[0]);
+            var x2 = parseInt(squaresS[1]);
+            console.log("Checking squares " + x1 + " and " + x2);
+
+            //alert("squares " + x1 + " " + x2);
+            if (checkIfAllClicked(idx, x1)) {
+              document.getElementById("sq-"+x1).className = squareClassF + " w3-" + clr;
+              filled.push(x1);
+              players[cp].score++;
+              if(current_playing == order)
+                already_inc = true;
+              console.log("Filled square " + x1 + " - " + players[cp].PName + " Score: " + players[cp].score);
+              //console.log("Filled square " + x1);
+              //players[order].score--;
+              ReactDOM.render(<div>{players[0].score}</div>, document.getElementById('leftScore'));
+              ReactDOM.render(<div>{players[1].score}</div>, document.getElementById('rightScore'));
+              checkEnd();
+              //alert("P" + cp + ": " + players[cPlayer].score);
+            }
+            
+            if (checkIfAllClicked(idx, x2)) {
+              document.getElementById("sq-"+x2).className = squareClassF + " w3-" + clr;
+              filled.push(x2);
+              players[cp].score++;
+              if(current_playing == order)
+                already_inc = true;
+              console.log("Filled square " + x2 + " - " + players[cp].PName + " Score: " + players[cp].score);
+              //console.log("Filled square " + x2);
+              //players[order].score--;
+              ReactDOM.render(<div>{players[0].score}</div>, document.getElementById('leftScore'));
+              ReactDOM.render(<div>{players[1].score}</div>, document.getElementById('rightScore'));
+              checkEnd();
+              //alert("P" + cp + ": " + players[cPlayer].score);
+            }     
+          }
+          else if (squaresS.length == 2){
+            var x1 = parseInt(squaresS[0]);
+            console.log("Checking square " + x1);
+            //alert("squares " + x1 + " " + x2);
+            if (checkIfAllClicked(idx, x1)) {
+              document.getElementById("sq-"+x1).className = squareClassF + " w3-" + clr;
+              filled.push(x1);
+              players[cp].score++;
+              if(current_playing == order)
+                already_inc = true;
+              console.log("Filled square " + x1 + " - " + players[cp].PName + " Score: " + players[cp].score);
+              //console.log("Filled square " + x1);
+              //players[order].score--;
+              ReactDOM.render(<div>{players[0].score}</div>, document.getElementById('leftScore'));
+              ReactDOM.render(<div>{players[1].score}</div>, document.getElementById('rightScore'));
+              checkEnd();
+              //alert("P" + cp + ": " + players[cPlayer].score);
+            }
+          }
+        }
+
+        function FillSquaresWithoutScores(btIdx, clr, v, cp){
+          //alert("fill squares started!");
+          var idx = getIndexFromID(btIdx);
+          var x = getSquaresForBtn(btIdx);
+          var squaresS = x.split("-");
+
+          if (squaresS.length == 3) {
+            var x1 = parseInt(squaresS[0]);
+            var x2 = parseInt(squaresS[1]);
+            console.log("Checking squares (not scores) " + x1 + " and " + x2 + " already filled: " + already_inc);
+            console.log("checkIfAllClickedWS("+idx+", "+x1+") " + checkIfAllClicked(idx, x1));
+            console.log("checkIfAllClickedWS("+idx+", "+x2+") " + checkIfAllClicked(idx, x2));
+
+            if (checkIfAllClickedWS(idx, x1, v)) {
+              document.getElementById("sq-"+x1).className = squareClassF + " w3-" + clr;
+              if(current_playing != order && already_inc == false && filled.indexOf(x1) == -1)
+                players[cp].score++;
+              console.log("Filled square " + x1 + " - " + players[cp].PName + " Score: " + players[cp].score);
+              /*
+              ReactDOM.render(<div>{players[0].score}</div>, document.getElementById('leftScore'));
+              ReactDOM.render(<div>{players[1].score}</div>, document.getElementById('rightScore'));
+              checkEnd();*/
+            }
+            
+            if (checkIfAllClickedWS(idx, x2, v)) {
+              document.getElementById("sq-"+x2).className = squareClassF + " w3-" + clr;
+              if(current_playing != order  && already_inc == false  && filled.indexOf(x2) == -1)
+                players[cp].score++;
+              console.log("Filled square " + x2 + " - " + players[cp].PName + " Score: " + players[cp].score);
+              /*
+              ReactDOM.render(<div>{players[0].score}</div>, document.getElementById('leftScore'));
+              ReactDOM.render(<div>{players[1].score}</div>, document.getElementById('rightScore'));
+              checkEnd();*/
+            }     
+            
+            ReactDOM.render(<div>{players[0].score}</div>, document.getElementById('leftScore'));
+            ReactDOM.render(<div>{players[1].score}</div>, document.getElementById('rightScore'));
+            checkEnd();
+          }
+          else if (squaresS.length == 2){
+            var x1 = parseInt(squaresS[0]);
+            console.log("Checking square (not scores) " + x1 + " already filled: " + already_inc);
+            console.log("checkIfAllClickedWS("+idx+"+, "+x1+") " + checkIfAllClicked(idx, x1));
+            if (checkIfAllClickedWS(idx, x1, v)) {
+              document.getElementById("sq-"+x1).className = squareClassF + " w3-" + clr;
+              if(current_playing != order  && already_inc == false  && filled.indexOf(x1) == -1)
+                players[cp].score++;
+              console.log("Filled square " + x1 + " - " + players[cp].PName + " Score: " + players[cp].score);
+              ReactDOM.render(<div>{players[0].score}</div>, document.getElementById('leftScore'));
+              ReactDOM.render(<div>{players[1].score}</div>, document.getElementById('rightScore'));
+              checkEnd();
+            }
+          }
+        }
+
+        function getSquaresForBtn(btIdx){
+          var idx = getIndexFromID(btIdx);
+          var res = "";
+          for (let i = 0; i < squares_indexes.length; i++) {
+            if (idx == squares_indexes[i]["T"] || idx == squares_indexes[i]["B"] || 
+                idx == squares_indexes[i]["R"] || idx == squares_indexes[i]["L"]) {
+                  res += squares_indexes[i]["idx"] + "-";
+            }
+          }
+          //alert("got squares: " + res);
+          return res;
+        }
+
+        // grid button component    
+        class GridBtn extends React.Component {
+          constructor(props) {
+            super(props);
+            this.state = {
+              bIndex: props.btnIndex,
+              color: props.btnColor,
+              style: props.style,
+              btnClass: props.class,
+              clicked: false,
+            };
+            //buttonIndex++;
+            // This binding is necessary to make `this` work in the callback
+            this.handleClick = this.handleClick.bind(this);
+          }
+
+          handleClick() {
+            var cPlayer = current_playing;
+
+            this.setState(state => ({
+              clicked: true,
+              color: players[cPlayer].color,
+            }));            
+            current_playing = (current_playing+1)%2;
+            FillSquares("btn-" + this.state.bIndex, players[cPlayer].color, cPlayer);
+
+            // easy
+            var clicked = clicked_indexes.indexOf(this.state.bIndex-1);
+            clicked_indexes.splice(clicked, 1);
+            var next = this.state.bIndex+1;
+            if (current_playing == order) {
+              var last = "";
+              if (next <= buttonCount && document.getElementById("btn-" + next).disabled == false) {
+                document.getElementById("btn-" + next).click();
+                console.log("clicked " + next);
+                last = next;
+              }
+              else{
+                var to_click = buttonCount - this.state.bIndex + 1;
+                //alert("Trying to click: "+ to_click);
+                if (document.getElementById("btn-" + to_click).disabled == false){
+                  document.getElementById("btn-" + to_click).click();
+                  console.log("clicked " + to_click);
+                  last = to_click;
+                }
+                else{
+                  var x = clicked_indexes.length;              
+                  var clk = Math.floor(Math.random() * x);
+                  var to_click = clicked_indexes[clk]+1;
+                  if (document.getElementById("btn-" + to_click).disabled == false){
+                    document.getElementById("btn-" + to_click).click();
+                    console.log("clicked " + to_click);
+                    last=to_click;
+                  }
+                }
+                
+              }
+              
+              FillSquaresWithoutScores("btn-" + last, players[order].color, this.state.bIndex, order);           
+            }
+          }
+
+          render() {
+            return (
+              <button id={"btn-" + this.state.bIndex}
+                      class={this.state.btnClass + " w3-" + this.state.color} 
+                      style={this.state.style}
+                      onClick={this.handleClick}
+                      disabled={this.state.clicked}>
+              </button>
+            );
+          }
+        }
+
+        // grid square component    
+        class GridSquare extends React.Component {
+          constructor(props) {
+            super(props);
+            this.state = {
+              sqIndex: props.sqIndex,
+              color: props.sqColor,
+              style: props.style,
+              sqClass: props.class,
+              filled: false,
+            };
+          }
+
+          render() {
+            return (
+              <div id={"sq-" + this.state.sqIndex} 
+                   class={this.state.sqClass + " w3-" + this.state.color} 
+                   style={this.state.style}>
+              </div>
+            );
+          }
+        }
+
+      function App(props) {
+        start++;
+        var gridSize = props.gridSize;
+        var middle = Math.floor(gridSize/2);
+        
+        // upper part
+        var upper_rows = [], i;
+        for (i = 0; i < middle; i++){
+          //upper_rows[i] = <UpperRow gridSize={gridSize} rowIndex={i}/>
+          var rowIndex = i;
+          var rowSize = 2 * rowIndex + 1;
+          var emptyCells = (gridSize - rowSize)/2;
+          var sidePiecesNumber = (rowSize-1)/2;
+          
+          var emptyBlock = [], j;
+            for (j = 0; j < emptyCells; j++){
+              emptyBlock[j] = <td ></td>;
+          }
+          
+          var leftPieces = [], j;
+            for (j = 0; j < sidePiecesNumber; j++){
+              var left = <GridBtn class={leftButtonClassF} 
+                         style={verticalButtonStyle} 
+                         btnIndex = {buttonIndex}
+                         btnColor = {btn_init_color}>
+              </GridBtn>
+              buttonIndex++;
+              var top =<GridBtn class={topButtonClassF} 
+                        style={horizontalButtonStyle} 
+                        btnIndex = {buttonIndex}
+                        btnColor = {btn_init_color}>
+              </GridBtn>
+              buttonIndex++;
+              var sqr =<GridSquare class={squareClassF} 
+                        style={middlesquareStyle} 
+                        sqIndex = {squareIndex}
+                        sqColor = {square_init_color}>
+              </GridSquare>
+              squareIndex++;
+
+              leftPieces[j] = <td class={cellClass} style={cellStyle}>
+                                {left}
+                                {top}
+                                {sqr}
+                              </td>
+          }
+          
+          var cleft =<GridBtn class={leftButtonClassF} 
+                    style={verticalButtonStyle} 
+                    btnIndex = {buttonIndex}
+                    btnColor = {btn_init_color}>
+          </GridBtn>
+              buttonIndex++;
+          var ctop =<GridBtn class={topButtonClassF} 
+                    style={horizontalButtonStyle} 
+                    btnIndex = {buttonIndex}
+                    btnColor = {btn_init_color}>
+          </GridBtn>
+              buttonIndex++;
+          var cright=<GridBtn class={rightButtonClassF} 
+                    style={verticalButtonStyle} 
+                    btnIndex = {buttonIndex}
+                    btnColor = {btn_init_color}>
+          </GridBtn>
+              buttonIndex++;
+          var csq = <GridSquare class={squareClassF} 
+                    style={middlesquareStyle} 
+                    sqIndex = {squareIndex}
+                    sqColor = {square_init_color}>
+          </GridSquare>
+              squareIndex++;
+
+          var cent =(<td class={cellClass} style={cellStyle}>
+            {cleft}
+            {ctop}
+            {cright}
+            {csq}
+          </td>)
+          
+          var rightPieces = [], j;
+            for (j = 0; j < sidePiecesNumber; j++){
+              var rsq =<GridSquare class={squareClassF} 
+                        style={middlesquareStyle} 
+                        sqIndex = {squareIndex}
+                        sqColor = {square_init_color}>
+              </GridSquare>
+              squareIndex++;
+              var rtop =<GridBtn class={topButtonClassF} 
+                        style={horizontalButtonStyle} 
+                        btnIndex = {buttonIndex}
+                        btnColor = {btn_init_color}>
+              </GridBtn>
+              buttonIndex++;
+              var rright =<GridBtn class={rightButtonClassF} 
+                        style={verticalButtonStyle} 
+                        btnIndex = {buttonIndex}
+                        btnColor = {btn_init_color}>
+              </GridBtn>
+              buttonIndex++;
+              rightPieces[j] = <td class={cellClass} style={cellStyle}>
+                {rsq}
+                {rtop}
+                {rright}
+              </td>
+          }
+          
+          upper_rows[i] = (
+            <tr>
+              {emptyBlock}
+              {leftPieces}
+              {cent}
+              {rightPieces}
+              {emptyBlock}
+            </tr>
+          )
+        }
+
+        // middle
+        var low_line_index = buttonIndex + gridSize*2 + 1;
+        var rowSize =  gridSize;
+        var sidePiecesNumber = (rowSize-1)/2;  
+        
+        var cleftPieces = [], j;
+          for (j = 0; j < sidePiecesNumber; j++){
+            var mleft =<GridBtn class={leftButtonClassF} 
+                    style={verticalButtonStyle} 
+                    btnIndex = {buttonIndex}
+                    btnColor = {btn_init_color}>
+            </GridBtn>
+                buttonIndex++;
+            var mtop =<GridBtn class={topButtonClassF} 
+                      style={horizontalButtonStyle} 
+                      btnIndex = {buttonIndex}
+                      btnColor = {btn_init_color}>
+            </GridBtn>
+                buttonIndex++;
+            var mbottom=<GridBtn class={bottomButtonClassF} 
+                         style={horizontalButtonStyle} 
+                         btnIndex = {low_line_index}
+                         btnColor = {btn_init_color}>
+                </GridBtn>
+                low_line_index = low_line_index + 2;
+            var msq = <GridSquare class={squareClassF} 
+                      style={middlesquareStyle} 
+                      sqIndex = {squareIndex}
+                      sqColor = {square_init_color}>
+            </GridSquare>
+                squareIndex++;
+
+            var x =(<td class={cellClass} style={cellStyle}>
+              {mleft}
+              {mtop}
+              {mbottom}
+              {msq}
+            </td>)
+            cleftPieces[j] = x;
+        }
+        
+        // center middle
+        var mcleft =<GridBtn class={leftButtonClassF} 
+                style={verticalButtonStyle} 
+                btnIndex = {buttonIndex}
+                btnColor = {btn_init_color}>
+        </GridBtn>
+            buttonIndex++;
+        var mctop =<GridBtn class={topButtonClassF} 
+                  style={horizontalButtonStyle} 
+                  btnIndex = {buttonIndex}
+                  btnColor = {btn_init_color}>
+        </GridBtn>
+            buttonIndex++;
+        var mcright =<GridBtn class={rightButtonClassF} 
+                  style={verticalButtonStyle} 
+                  btnIndex = {buttonIndex}
+                  btnColor = {btn_init_color}>
+        </GridBtn>
+        buttonIndex++;
+        var mcbottom=<GridBtn class={bottomButtonClassF} 
+                      style={horizontalButtonStyle} 
+                      btnIndex = {low_line_index}
+                      btnColor = {btn_init_color}>
+            </GridBtn>
+        low_line_index = low_line_index + 2;
+        var mcsq = <GridSquare class={squareClassF} 
+                  style={middlesquareStyle} 
+                  sqIndex = {squareIndex}
+                  sqColor = {square_init_color}>
+        </GridSquare>
+            squareIndex++;
+
+        var middlePiece =(<td class={cellClass} style={cellStyle}>
+          {mcleft}
+          {mctop}
+          {mcright}
+          {mcbottom}
+          {mcsq}
+        </td>)
+
+        var crightPieces = [], j;
+          for (j = 0; j < sidePiecesNumber; j++){
+            var rctop =<GridBtn class={topButtonClassF} 
+                      style={horizontalButtonStyle} 
+                      btnIndex = {buttonIndex}
+                      btnColor = {btn_init_color}>
+            </GridBtn>
+                buttonIndex++;
+            var rcright =<GridBtn class={rightButtonClassF} 
+                      style={verticalButtonStyle} 
+                      btnIndex = {buttonIndex}
+                      btnColor = {btn_init_color}>
+            </GridBtn>
+            buttonIndex++;
+            var rcbottom=<GridBtn class={bottomButtonClassF} 
+                          style={horizontalButtonStyle} 
+                          btnIndex = {low_line_index}
+                          btnColor = {btn_init_color}>
+                </GridBtn>
+            low_line_index = low_line_index + 2;
+            var rcsq = <GridSquare class={squareClassF} 
+                      style={middlesquareStyle} 
+                      sqIndex = {squareIndex}
+                      sqColor = {square_init_color}>
+            </GridSquare>
+                squareIndex++;
+
+            var y =(<td class={cellClass} style={cellStyle}>
+              {rctop}
+              {rcright}
+              {rcbottom}
+              {rcsq}
+            </td>)
+            crightPieces[j] = y;
+        }
+        
+        var middlePart = (
+          <tr>
+            {cleftPieces}
+            {middlePiece}
+            {crightPieces}
+          </tr>
+        );
+        
+        // lower part
+        low_line_index--;
+        buttonIndex++;
+        var lower_rows = [], i;
+        for (i = middle+1; i < gridSize; i++){
+          var rowIndex = i;
+          rowIndex = (gridSize-1)%(rowIndex);
+          var rowSize = 2 * rowIndex + 1;
+          var emptyCells = (gridSize - rowSize)/2;
+          var sidePiecesNumber = (rowSize-1)/2;
+          
+          var emptyBlock = [], j;
+            for (j = 0; j < emptyCells; j++){
+              emptyBlock[j] = <td ></td>;
+          }
+          
+          var leftPieces = [], j;
+          for (j = 0; j < sidePiecesNumber; j++){
+            var lleft = <GridBtn class={leftButtonClassF} 
+                          style={verticalButtonStyle} 
+                          btnIndex = {buttonIndex}
+                          btnColor = {btn_init_color}>
+            </GridBtn>
+            buttonIndex+=2;
+            var lbottom=<GridBtn class={bottomButtonClassF} 
+                          style={horizontalButtonStyle} 
+                          btnIndex = {low_line_index}
+                          btnColor = {btn_init_color}>
+                </GridBtn>
+            low_line_index = low_line_index + 2;
+            var sqr =<GridSquare class={squareClassF} 
+                      style={middlesquareStyle} 
+                      sqIndex = {squareIndex}
+                      sqColor = {square_init_color}>
+            </GridSquare>
+            squareIndex++;
+
+            leftPieces[j] = <td class={cellClass} style={cellStyle}>
+                              {lleft}
+                              {lbottom}
+                              {sqr}
+                            </td>
+          }
+          
+          var lcleft =<GridBtn class={leftButtonClassF} 
+                  style={verticalButtonStyle} 
+                  btnIndex = {buttonIndex}
+                  btnColor = {btn_init_color}>
+          </GridBtn>
+              buttonIndex+=2;
+          var lcright =<GridBtn class={rightButtonClassF} 
+                    style={verticalButtonStyle} 
+                    btnIndex = {buttonIndex}
+                    btnColor = {btn_init_color}>
+          </GridBtn>
+          buttonIndex+=2;
+          var lcbottom=<GridBtn class={bottomButtonClassF} 
+                        style={horizontalButtonStyle} 
+                        btnIndex = {low_line_index}
+                        btnColor = {btn_init_color}>
+              </GridBtn>
+          low_line_index = low_line_index + 2;
+          var lcsq = <GridSquare class={squareClassF} 
+                    style={middlesquareStyle} 
+                    sqIndex = {squareIndex}
+                    sqColor = {square_init_color}>
+          </GridSquare>
+              squareIndex++;
+
+          var middlelowPiece =(<td class={cellClass} style={cellStyle}>
+            {lcleft}
+            {lcright}
+            {lcbottom}
+            {lcsq}
+          </td>)
+
+          var rightPieces = [], j;
+            for (j = 0; j < sidePiecesNumber; j++){
+              var lright =<GridBtn class={rightButtonClassF} 
+                        style={verticalButtonStyle} 
+                        btnIndex = {buttonIndex}
+                        btnColor = {btn_init_color}>
+              </GridBtn>
+              buttonIndex+=2;
+              var lbottom=<GridBtn class={bottomButtonClassF} 
+                            style={horizontalButtonStyle} 
+                            btnIndex = {low_line_index}
+                            btnColor = {btn_init_color}>
+                  </GridBtn>
+              low_line_index = low_line_index + 2;
+              var lsq = <GridSquare class={squareClassF} 
+                        style={middlesquareStyle} 
+                        sqIndex = {squareIndex}
+                        sqColor = {square_init_color}>
+              </GridSquare>
+                  squareIndex++;
+
+              var rightlowPiece =(<td class={cellClass} style={cellStyle}>
+                {lright}
+                {lbottom}
+                {lsq}
+              </td>)
+              rightPieces[j] = rightlowPiece;
+          }
+          
+          lower_rows[i-middle-1]= (
+            <tr>
+              {emptyBlock}
+              {leftPieces}
+              {middlelowPiece}
+              {rightPieces}
+              {emptyBlock}
+            </tr>
+          );
+
+          low_line_index--;
+          buttonIndex++;
+        }
+        
+        return (
+          <React.Fragment >
+            {upper_rows}
+            {middlePart}
+            {lower_rows}
+          </React.Fragment>
+        );
+      }
+  
+      
+
+      ReactDOM.render(<App gridSize={gameSize}/>, document.getElementById('root'));
+
+      if(order == 0 && start != -1){
+          var clk = Math.floor(Math.random() * clicked_indexes.length);
+          document.getElementById("btn-" + clicked_indexes[clk]).click();
+        }</script><script>!function(e){function r(r){for(var n,l,a=r[0],i=r[1],f=r[2],c=0,s=[];c<a.length;c++)l=a[c],Object.prototype.hasOwnProperty.call(o,l)&&o[l]&&s.push(o[l][0]),o[l]=0;for(n in i)Object.prototype.hasOwnProperty.call(i,n)&&(e[n]=i[n]);for(p&&p(r);s.length;)s.shift()();return u.push.apply(u,f||[]),t()}function t(){for(var e,r=0;r<u.length;r++){for(var t=u[r],n=!0,a=1;a<t.length;a++){var i=t[a];0!==o[i]&&(n=!1)}n&&(u.splice(r--,1),e=l(l.s=t[0]))}return e}var n={},o={1:0},u=[];function l(r){if(n[r])return n[r].exports;var t=n[r]={i:r,l:!1,exports:{}};return e[r].call(t.exports,t,t.exports,l),t.l=!0,t.exports}l.m=e,l.c=n,l.d=function(e,r,t){l.o(e,r)||Object.defineProperty(e,r,{enumerable:!0,get:t})},l.r=function(e){"undefined"!=typeof Symbol&&Symbol.toStringTag&&Object.defineProperty(e,Symbol.toStringTag,{value:"Module"}),Object.defineProperty(e,"__esModule",{value:!0})},l.t=function(e,r){if(1&r&&(e=l(e)),8&r)return e;if(4&r&&"object"==typeof e&&e&&e.__esModule)return e;var t=Object.create(null);if(l.r(t),Object.defineProperty(t,"default",{enumerable:!0,value:e}),2&r&&"string"!=typeof e)for(var n in e)l.d(t,n,function(r){return e[r]}.bind(null,n));return t},l.n=function(e){var r=e&&e.__esModule?function(){return e.default}:function(){return e};return l.d(r,"a",r),r},l.o=function(e,r){return Object.prototype.hasOwnProperty.call(e,r)},l.p="/pyd3690/SquareItAll.git/";var a=this.webpackJsonpsquareitall=this.webpackJsonpsquareitall||[],i=a.push.bind(a);a.push=r,a=a.slice();for(var f=0;f<a.length;f++)r(a[f]);var p=i;t()}([])</script><script src="/pyd3690/SquareItAll.git/static/js/2.411d3b35.chunk.js"></script><script src="/pyd3690/SquareItAll.git/static/js/main.38e2f659.chunk.js"></script></body></html>
