@@ -1,23 +1,23 @@
 {
   "files": {
-    "main.css": "/pyd3690/SquareItAll.git/static/css/main.5f361e03.chunk.css",
-    "main.js": "/pyd3690/SquareItAll.git/static/js/main.38e2f659.chunk.js",
-    "main.js.map": "/pyd3690/SquareItAll.git/static/js/main.38e2f659.chunk.js.map",
-    "runtime-main.js": "/pyd3690/SquareItAll.git/static/js/runtime-main.980e8ada.js",
-    "runtime-main.js.map": "/pyd3690/SquareItAll.git/static/js/runtime-main.980e8ada.js.map",
-    "static/js/2.411d3b35.chunk.js": "/pyd3690/SquareItAll.git/static/js/2.411d3b35.chunk.js",
-    "static/js/2.411d3b35.chunk.js.map": "/pyd3690/SquareItAll.git/static/js/2.411d3b35.chunk.js.map",
-    "index.html": "/pyd3690/SquareItAll.git/index.html",
-    "precache-manifest.76b743af59a0ef6f00763c3df9c6b9cc.js": "/pyd3690/SquareItAll.git/precache-manifest.76b743af59a0ef6f00763c3df9c6b9cc.js",
-    "service-worker.js": "/pyd3690/SquareItAll.git/service-worker.js",
-    "static/css/main.5f361e03.chunk.css.map": "/pyd3690/SquareItAll.git/static/css/main.5f361e03.chunk.css.map",
-    "static/js/2.411d3b35.chunk.js.LICENSE.txt": "/pyd3690/SquareItAll.git/static/js/2.411d3b35.chunk.js.LICENSE.txt",
-    "static/media/logo.svg": "/pyd3690/SquareItAll.git/static/media/logo.5d5d9eef.svg"
+    "main.css": "/SquareItAll/static/css/main.5f361e03.chunk.css",
+    "main.js": "/SquareItAll/static/js/main.f42e4f78.chunk.js",
+    "main.js.map": "/SquareItAll/static/js/main.f42e4f78.chunk.js.map",
+    "runtime-main.js": "/SquareItAll/static/js/runtime-main.cebec117.js",
+    "runtime-main.js.map": "/SquareItAll/static/js/runtime-main.cebec117.js.map",
+    "static/js/2.411d3b35.chunk.js": "/SquareItAll/static/js/2.411d3b35.chunk.js",
+    "static/js/2.411d3b35.chunk.js.map": "/SquareItAll/static/js/2.411d3b35.chunk.js.map",
+    "index.html": "/SquareItAll/index.html",
+    "precache-manifest.42e0cb0bb761f53c258be0758a12ca87.js": "/SquareItAll/precache-manifest.42e0cb0bb761f53c258be0758a12ca87.js",
+    "service-worker.js": "/SquareItAll/service-worker.js",
+    "static/css/main.5f361e03.chunk.css.map": "/SquareItAll/static/css/main.5f361e03.chunk.css.map",
+    "static/js/2.411d3b35.chunk.js.LICENSE.txt": "/SquareItAll/static/js/2.411d3b35.chunk.js.LICENSE.txt",
+    "static/media/logo.svg": "/SquareItAll/static/media/logo.5d5d9eef.svg"
   },
   "entrypoints": [
-    "static/js/runtime-main.980e8ada.js",
+    "static/js/runtime-main.cebec117.js",
     "static/js/2.411d3b35.chunk.js",
     "static/css/main.5f361e03.chunk.css",
-    "static/js/main.38e2f659.chunk.js"
+    "static/js/main.f42e4f78.chunk.js"
   ]
 }
