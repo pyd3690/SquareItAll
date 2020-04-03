@@ -1,23 +1,23 @@
 self.__precacheManifest = (self.__precacheManifest || []).concat([
   {
-    "revision": "24c5a5f7f223c2d733b81c14abae53e3",
+    "revision": "450a0ee83367d257ab0e057c8f320e1e",
     "url": "/SquareItAll/index.html"
   },
   {
-    "revision": "9e7f117e0f3f183a2395",
+    "revision": "7ab48d3b629a788533dc",
     "url": "/SquareItAll/static/css/main.5f361e03.chunk.css"
   },
   {
-    "revision": "60b5fdd9e79c04d5de76",
-    "url": "/SquareItAll/static/js/2.411d3b35.chunk.js"
+    "revision": "e41eeb87b565f950bddd",
+    "url": "/SquareItAll/static/js/2.ce8d1243.chunk.js"
   },
   {
     "revision": "e88a3e95b5364d46e95b35ae8c0dc27d",
-    "url": "/SquareItAll/static/js/2.411d3b35.chunk.js.LICENSE.txt"
+    "url": "/SquareItAll/static/js/2.ce8d1243.chunk.js.LICENSE.txt"
   },
   {
-    "revision": "9e7f117e0f3f183a2395",
-    "url": "/SquareItAll/static/js/main.f42e4f78.chunk.js"
+    "revision": "7ab48d3b629a788533dc",
+    "url": "/SquareItAll/static/js/main.eeb446f5.chunk.js"
   },
   {
     "revision": "cc9e1566d95b04a27742",
